@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <Version>1.0.0</Version>
+    <Authors>Lord Saumagen (Lord.Saumagen@outlook.com)</Authors>
+    <Company>Private</Company>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Description>
+      Extension library for change detection, comparing and copying 
+      data objects. 
+    </Description>
+    <RepositoryUrl>https://github.com/lord-saumagen/DataObjectExtension</RepositoryUrl>
+    <PackageLicenseUrl>https://opensource.org/licenses/MS-PL</PackageLicenseUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>
