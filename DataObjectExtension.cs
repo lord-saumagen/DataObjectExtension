@@ -113,8 +113,9 @@ namespace DataObjectExtension
     /// <param name="self"></param>
     /// <typeparam name="TSelf"></typeparam>
     /// <param name="excludeSelect"></param>
+    /// <param name="includeSelect"></param>
     /// <returns>byte[], the hash value</returns>
-    public static byte[] CreateHash<TSelf>(this TSelf self, Func<PropertyInfo, bool> excludeSelect = null)
+    public static byte[] CreateHash<TSelf>(this TSelf self, Func<PropertyInfo, bool> excludeSelect = null, Func<PropertyInfo, bool> includeSelect = null)
     {
       List<PropertyInfo> propertyInfoList;
       string selfHashString;
@@ -123,12 +124,26 @@ namespace DataObjectExtension
       .Where(item => item.CanRead)
       .ToList();
 
+      //
+      // Default behavior no exclusion.
+      //
       if(excludeSelect == null)
       {
         //
         // NOP exclude selection. 
         //
-        excludeSelect = (selfObj) => { return false;};
+        excludeSelect = (property) => { return false;};
+      }
+
+      //
+      // Default behavior all included.
+      //
+      if(includeSelect == null)
+      {
+        //
+        // NOP include selection. 
+        //
+        includeSelect = (property) => {return true;};
       }
 
       selfHashString = string.Empty;
@@ -141,6 +156,15 @@ namespace DataObjectExtension
           //
           continue;
         }
+
+        if(!includeSelect(property))
+        {
+          //
+          // Current property is not included. Continue with the next.
+          //
+          continue;
+        }
+
 
         if (property.PropertyType.IsPrimitive || property.PropertyType.IsValueType || property.PropertyType == typeof(string))
         {
@@ -176,9 +200,10 @@ namespace DataObjectExtension
     /// <param name="other"></param>
     /// <param name="mapList"></param>
     /// <param name="excludeSelect"></param>
+    /// <param name="includeSelect"></param>
     /// <typeparam name="TSelf"></typeparam>
     /// <typeparam name="TOther"></typeparam>
-    public static bool IsEqualTo<TSelf, TOther>(this TSelf self, TOther other, List<Map> mapList = null, Func<PropertyInfo, bool> excludeSelect = null) where TSelf : class where TOther : class
+    public static bool IsEqualTo<TSelf, TOther>(this TSelf self, TOther other, List<Map> mapList = null, Func<PropertyInfo, bool> excludeSelect = null, Func<PropertyInfo, bool> includeSelect = null) where TSelf : class where TOther : class
     {
       List<PropertyInfo> propertyInfoList;
       string selfHashString;
@@ -186,12 +211,26 @@ namespace DataObjectExtension
       PropertyInfo otherProperty;
       Map map;
 
+      //
+      // Default behavior is no exclusion.
+      //
       if(excludeSelect == null)
       {
         //
         // NOP exclude selection. 
         //
-        excludeSelect = (selfObj) => { return false;};
+        excludeSelect = (property) => { return false;};
+      }
+
+      //
+      // Default behavior is all included
+      //
+      if(includeSelect == null)
+      {
+        //
+        // NOP include selection. 
+        //
+        includeSelect = (property) => { return true;};
       }
 
       propertyInfoList = self.GetType().GetProperties()
@@ -207,6 +246,14 @@ namespace DataObjectExtension
         {
           //
           // Current property is exclude. Continue with the next.
+          //
+          continue;
+        }
+
+        if(!includeSelect(property))
+        {
+          //
+          // Current property is not included. Continue with the next.
           //
           continue;
         }
@@ -303,11 +350,12 @@ namespace DataObjectExtension
     /// <param name="other"></param>
     /// <param name="mapList"></param>
     /// <param name="excludeSelect"></param>
+    /// <param name="includeSelect"></param>
     /// <typeparam name="TSelf"></typeparam>
     /// <typeparam name="TOther"></typeparam>
     /// <exception cref="DataObjectExtensionException">In case a target property is missing or a conversion failed.</exception>
     /// <exception cref="System.ArgumentException">In case the 'other' object is null.</exception>
-    public static void CopyTo<TSelf, TOther>(this TSelf self, TOther other, List<Map> mapList = null, Func<PropertyInfo, bool> excludeSelect = null) where TSelf : class where TOther : class
+    public static void CopyTo<TSelf, TOther>(this TSelf self, TOther other, List<Map> mapList = null, Func<PropertyInfo, bool> excludeSelect = null, Func<PropertyInfo, bool> includeSelect = null  ) where TSelf : class where TOther : class
     {
       List<PropertyInfo> propertyInfoList;
       Dictionary<PropertyInfo, PropertyInfo> SourceTargetDict;
@@ -325,12 +373,26 @@ namespace DataObjectExtension
          throw new System.ArgumentException($"Argument '{other}' must not be null in function '{className + "." + methodName}'.");
       }
 
+      //
+      // The default behavior is not exclusion.
+      //
       if(excludeSelect == null)
       {
         //
         // NOP exclude selection. 
         //
-        excludeSelect = (selfObj) => { return false;};
+        excludeSelect = (property) => { return false;};
+      }
+
+      //
+      // The default behavior is all inclusion.
+      //
+      if(includeSelect == null)
+      {
+        //
+        // NOP exclude selection. 
+        //
+        includeSelect = (property) => { return true;};
       }
 
       SourceTargetDict = new Dictionary<PropertyInfo, PropertyInfo>();
@@ -345,6 +407,14 @@ namespace DataObjectExtension
         {
           //
           // Current property is exclude. Continue with the next.
+          //
+          continue;
+        }
+
+        if(!includeSelect(property))
+        {
+          //
+          // Current property is not included. Continue with the next.
           //
           continue;
         }

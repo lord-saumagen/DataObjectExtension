@@ -1,22 +1,36 @@
+# V1.0.1 Release
+
+I added an **'includeSelect'** delegate on all three extension functions. I learned that 
+an **'excludeSelect'** function alone falls short, if you have to deal with objects which
+posses a lot of properties but only a few of them are of interest. An **'excludeSelect'**
+is sufficient to constrain the selection to the few properties of interest. But you
+have to add the majority of the properties to the **'excludeSelect'** function in order
+to get the required result. That's not only boring, but also an error-prone task.
+Using the **'includeSelect'** constraints the properties to those properties which
+create a 'true' result in the **'includeSelect'** function.  
+If you use both delegates in one of the functions, the **'excludeSelect'** delegate
+will take precedence. In other words, properties which are already excluded stay excluded
+even if the **'includeSelect'** function would qualify them for inclusion.
+
 # Data object extension
 ## Motivation
 When you have to deal with multi-tier applications, you often have to deal with
-data which crosses the tiers from the UI to the persistence layer and back. Often enough 
+data which crosses the tiers from the UI to the persistence layer and vice versa. Often enough 
 each tier has it's own requirement for the data representation, which leads to 
-copy operations from the data objects in one tier into the data objects in the 
-other tier and vice versa. Some well known examples are the MVVM or the MVC 
+copy operations from the data objects between two different tiers. Some well known examples are the MVVM or the MVC 
 frameworks where you have to deal with data objects which fits to the data sink 
 (which is in most cases a database) and a view model which fits to the user 
 interface representation of the data. Often enough the reality is more complex
 like this and you have to deal with a lot more different data models. 
 Since the naive way of writing code for this copy operations over and over 
-again is cumbersome and error-prone some programmers already thought about a solution for that specific problem. The most famous of them is the [AutoMapper](https://github.com/AutoMapper/AutoMapper)
+again is cumbersome and error-prone some programmers already created a solution 
+for that specific problem. The most famous of them is the [AutoMapper](https://github.com/AutoMapper/AutoMapper)
 which is available at GitHub. This solution is similar in many ways but is 
-much more light wight. 
+much more lightwight. 
 
 Data objects are normally defined as flat objects which have a bunch of properties but no
 object hierarchy. For that reason this extension deals only with primitive attributes,
-value attributes and strings. The extension ignores every other attributes of 
+value attributes and strings. The extension ignores every other attribute of 
 the participating objects. 
 
 There are three tasks which will always arise when you have to deal with data 
@@ -26,7 +40,7 @@ objects.
 2) Deciding if a data object has changed.  
 3) Copying data from one object to another.  
 
-The following paragraph will tell how to deal with this task by using the 'DataObjectExtension'.
+The following paragraphs will tell you how to deal with this tasks by using the 'DataObjectExtension'.
 
 ## Usage
 
@@ -46,7 +60,7 @@ dotnet add package "DataObjectExtension"
 ```
 
 
-If you are using some other kind of nuget package manager use that manager. They often comme with a GUI which simplifies the installation process. 
+If you are using some other kind of nuget package manager use that manager. They often come with a GUI which simplifies the installation process. 
 
 After the installation you have to reference the 'DataObjectExtension' namespace in every class of your project where you intent to use the extension.
 
@@ -60,7 +74,7 @@ I'm going to explain the functions in detail in the next paragraphs.
 
 #### Default behavior
 
-The 'IsEqualTo' function does a duck type compare with another function and returns true if the comparison passed, otherwise false. A 'duck type' compare means the 'other' object can be of any type. There is no need that the current object and the other object are of the same type. The other object just has to have properties with the same name and type.
+The 'IsEqualTo' function does a duck type compare with another object and returns true if the comparison passed, otherwise false. A 'duck type' compare means the 'other' object can be of any type. There is no need that the current object and the other object are of the same type. The other object just has to have properties with the same name and type.
 
 The comparison of the object takes part in three steps.  
 
@@ -144,11 +158,11 @@ Here is an example. Lets say you have two objects like those below.
 
 ![PseudoCode_Map](./DOCS/PseudoCode_Map.png "Pseudo code map")
 
-The default compare function would tell you that the objects are not equal because they have neither a common name for one of the properties nor common types. But you know that the 'Validate' property on the current object can be compared with the 'IsValid' property on the 'other' object which holds either a 'true' or a 'false' string. You also know that the integer value of the 'NumberOfChars' property on the current object can be compared with the boolean property 'IsEmpty' on the 'other' object. 
+The default IsEqualTo function would tell you that the objects are not equal, because they have neither a common name for one of the properties nor common types. But you might want to compare the 'Validate' property on the current object to the 'IsValid' property on the 'other' object, which holds either a 'true' or a 'false' string. You also might want to compare the integer value of the 'NumberOfChars' property on the current object to the boolean property 'IsEmpty' on the 'other' object. 
 
 ![PseudoCode_MapRef](./DOCS/PseudoCode_MapRef.png "Pseudo code map with reference")
 
-In order to make that happen you have to use the **'Convert'** delegate on each **'Map'** object for these properties. The **'Convert'** delegate gets the boxed value of the mapped property of the current object as input parameter. The function has to convert that value into the required target type before the value is returned. The returned value will than be used to calculate the hash on the current object. The **'Convert'** function for the first property would look like this:
+In order to make that happen, you have to use the **'Convert'** delegate on each **'Map'** object for these properties. The **'Convert'** delegate gets the boxed value of the mapped property of the current object as input parameter. The function has to convert that value into the required target type before the value is returned. The returned value will than be used to calculate the hash on the current object. The **'Convert'** function for the first property would look like this:
 
 ```C#
 (boxedValue) => { return ((bool) boxedValue).ToString().ToLower();}
@@ -202,13 +216,13 @@ Now the function would return true for the example objects.
 
 #### Comparison with excluded properties
 
-You may run into a situation where you want to compare two objects but some of the source object properties shouldn't take part into that comparison. May be the target object lacks those properties. Or may be the target object possesses those properties but they have a different meaning on the target object. That is the moment where the exclude selector comes into play. The exclude selector is a predicate delegate. The delegate is defined as:
+You may run into a situation where you want to compare two objects but some of the source object properties shouldn't take part into that comparison. May be the target object lacks those properties, or may be the target object possesses those properties but they have a different meaning on the target object. That is the moment where the exclude selector comes into play. The exclude selector is a predicate delegate. The delegate is defined as:
 
 ```C#
 Func<PropertyInfo, bool>
 ```
 
-The exclude selector function gets called for each property on the current object which qualifies as comparable property. The function has than to decide wether the property should take part into comparison or not. If the function returns true for one of the **PropertyInfo** objects, the property will be excluded. Hence the name of that delegate.
+The exclude selector delegate gets called for each property on the current object which qualifies as comparable property. The function has than to decide whether the property should take part into comparison or not. If the function returns true for one of the **PropertyInfo** objects, the property will be excluded. Hence the name of that delegate.
 
 Here is an example:
 
@@ -230,16 +244,51 @@ thisObject.IsEqualTo(otherObject, null, (property) => { return property.Name == 
 
 The result would be true, because the remaining properties are equal. Of course it's possible to combine the default compare rules, the mapping and the exclude selector in one **'IsEqualTo'** function call. 
 
+#### Comparison with included properties
+
+The **'IncludeSelector'** is a predicate delegate. The delegate is defined as:
+
+```C#
+Func<PropertyInfo, bool>
+```
+The **'IncludeSelector'** is pretty much the opposite of the **'ExcludeSelector'**.  
+
+The include selector function gets called for each property on the current object which qualifies as comparable property. The function has than to decide whether the property should take part into comparison or not. If the function returns true for one of the **PropertyInfo** objects, the property will be included. Hence the name of that delegate.  
+
+**Attention:**
+
+**Any other property of the object which isn't recognized as property to include, will be excluded.**  
+
+That means as soon as you use the include selector, all properties which are not selected by the include selector are excluded. Even if they otherwise would qualify to take part on the operation. 
+
+If you use the **'IncludeSelector'** and **'ExcludeSelector'** together in one function, the **'ExcludeSelector'** will take precedence. That means, once a property
+is recognized by the **'ExcludeSelector'** as a property to exclude, you won't be able to include this property again by using the **'IncludeSelector'**. 
+
+Here is an example. Lets say you have an object with this 5 properties:  
+**"One, Two, Three, Four and Five"**  
+Your include selector includes the properties:  
+**"Two, Three and Four"**  
+Which effectively creates a subset from the original set ob properties by excluding all properties which are not recognized by the include selector.  
+Now you use the include selector in combination with an exclude selector which excludes the property:  
+**"Three"**  
+Your result set will now be:  
+**"Two and Four"**  
+Since the exclude selector takes precedence, you can't reassign an already exclude property to the result set. Even if you name the property in your include selector. I hope you got the picture.
+
+
+
+
 ### Copying into the target object
 
-The **'CopyTo'** extension function works with the same function parameters as the **'IsEqualTo'** extension function. The function parameter have the same meaning, except that they are used to select, convert and exclude the properties from the source object which will be copied to the target object. They are not longer used for comparison in that case. 
+The **'CopyTo'** extension function works with the same function parameters as the **'IsEqualTo'** extension function. The function parameter have the same meaning, except that they are used to select, convert and exclude/include the properties from the source object which will be copied to the target object. They are not longer used for comparison in that case. 
 
-That means, if the set of function parameter which was used in a comparison function lead to the result that the objects are equal, there is no reason for a copy operation. On the other hand, if the result revealed that the objects are different, you are going to use the same function parameter which you use during comparison in the copy function.
+That means, if the set of function parameter which was used in a comparison function lead to the result that the objects are equal, there is no reason for a copy operation. On the other hand, if the result revealed that the objects are different, you are going to use the same function parameter which you used during comparison in the copy function.
 
 ### Creating a hash for change detection
 
 The **'CreateHash'** extension function creates a hash over the current object. The hash is a byte array which is create by the internally used SHA256 hash algorithm. The properties whose values will go into the hash calculation are selected according to the default rules.  
 The **"CreateHash'** function can also be use with an **'ExcludeSelector'** delegate to exclude some properties from hashing which otherwise would contribute to the created hash.  
+Using the **'IncludeSelector'** delegate in the hash function will constrain the hash function to only use the properties which are recognized as include properties for the hash value calculation. Using both delegates works according to the other extension functions.
 The **'CreateHash'** doesn't offer a convert delegate because it doesn't make any sense in this context. If you need to know that your object has or has not changed during an operation you have to create a hash before and after the operation. If the hashes are equal, the object hasn't changed. The workflow looks like this:
 
 ```C#
@@ -259,12 +308,12 @@ var unchanged = hashBefore.SequenceEqual(hashAfterwards);
 ### General remarks
 
 There is no compile time support for the extension functions. Because the state of the objects the extension function have to deal with can only be evaluated at runtime. The functions might throw exceptions at any time. That might be no big deal if it happens during a compare operation. That wouldn't harm the object state since the compare operation doesn't change the object state. But it might also happen during a copy operation. In that case the target object state is undefined.  
-For that reason serious testing is inevitable to make sure that everything works as expected.
+For that reason, serious testing is inevitable to make sure that everything works as expected.
 
 ### Technical documentation
 
 You will find the technical documentation in the **'DOCS/html'** folder.  
-[index](./DOCS/html/index.html "index.html")
+[index](http://htmlpreview.github.io/?https://raw.githubusercontent.com/lord-saumagen/DataObjectExtension/master/DOCS/html/index.html "index.html")
 
 ### License
 

@@ -1,16 +1,16 @@
 ﻿<!doctype html>
 <html lang="en">
 <head>
-<title>DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;) Method</title>
+<title>DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;, Func&lt;PropertyInfo, bool&gt;) Method</title>
 <meta charset="UTF-8"/>
 <link rel="stylesheet" type="text/css" href="style.css"/></head>
 <body>
 
-<h1 id="DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;) Method">DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;) Method</h1>
+<h1 id="DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;, Func&lt;PropertyInfo, bool&gt;) Method">DataObjectExtension.IsEqualTo&lt;TSelf, TOther&gt;(this TSelf, TOther, List&lt;Map&gt;, Func&lt;PropertyInfo, bool&gt;, Func&lt;PropertyInfo, bool&gt;) Method</h1>
 
 <blockquote>
 Namespace: <a href="index.html#DataObjectExtension%20Namespace">DataObjectExtension</a><br/>
-Assembly: <a href="index.html">DataObjectExtension</a> (DataObjectExtension.dll) version 1.0.0.0
+Assembly: <a href="index.html">DataObjectExtension</a> (DataObjectExtension.dll) version 1.0.1.0
 </blockquote>
 
 <div class="block">This function does a duck type compare between the current object and another object. It does it by calculating a hash value over all the public readable value properties and string properties of the current object and over all readable corresponding properties of the other object. Corresponding properties are either properties with the same name and type as the source property or properties which are mapped to a property of the current object. The function returns true if the hash values are the same, otherwise false.</div>
@@ -21,7 +21,8 @@ Assembly: <a href="index.html">DataObjectExtension</a> (DataObjectExtension.dll)
     this TSelf self, 
     TOther other, 
     List&lt;Map&gt; mapList = null, 
-    Func&lt;PropertyInfo, bool&gt; excludeSelect = null
+    Func&lt;PropertyInfo, bool&gt; excludeSelect = null, 
+    Func&lt;PropertyInfo, bool&gt; includeSelect = null
 )
     where TSelf : class
     where TOther : class</pre>
@@ -45,6 +46,8 @@ Assembly: <a href="index.html">DataObjectExtension</a> (DataObjectExtension.dll)
 </dd><dt><code>mapList</code>: <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1">List&lt;Map&gt;</a></dt><dd>
 <div class="block"></div>
 </dd><dt><code>excludeSelect</code>: <a href="https://docs.microsoft.com/en-us/dotnet/api/system.func-2,">Func&lt;PropertyInfo, bool&gt;</a></dt><dd>
+<div class="block"></div>
+</dd><dt><code>includeSelect</code>: <a href="https://docs.microsoft.com/en-us/dotnet/api/system.func-2,">Func&lt;PropertyInfo, bool&gt;</a></dt><dd>
 <div class="block"></div>
 </dd></dl>
 
